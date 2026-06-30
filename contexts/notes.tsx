@@ -1,9 +1,13 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   createContext,
   useContext,
+  useEffect,
   useState,
   type ReactNode,
 } from "react";
+
+const STORAGE_KEY = "@notes";
 
 export type Note = {
   id: string;
@@ -32,13 +36,26 @@ const INITIAL_NOTES: Note[] = [
 export function NotesProvider({ children }: { children: ReactNode }) {
   const [notes, setNotes] = useState<Note[]>(INITIAL_NOTES);
 
+  useEffect(() => {
+    AsyncStorage.getItem(STORAGE_KEY).then((raw) => {
+      if (raw) {
+        setNotes(JSON.parse(raw) as Note[]);
+      }
+    });
+  }, []);
+
+  const saveNotes = (next: Note[]) => {
+    setNotes(next);
+    AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+  };
+
   const addNote: NotesContextValue["addNote"] = ({ title, text }) => {
     const note: Note = {
       id: String(Date.now()),
       title: title.trim() || "Sans titre",
       text,
     };
-    setNotes((prev) => [note, ...prev]);
+    saveNotes([note, ...notes]);
     return note;
   };
 
@@ -56,7 +73,7 @@ export function NotesProvider({ children }: { children: ReactNode }) {
     );
 
   const deleteNote: NotesContextValue["deleteNote"] = (id) =>
-    setNotes((prev) => prev.filter((n) => n.id !== id));
+    saveNotes(notes.filter((n) => n.id !== id));
 
   return (
     <NotesContext.Provider
