@@ -15,6 +15,7 @@ type NotesContextValue = {
   notes: Note[];
   addNote: (note: { title: string; text: string }) => Note;
   getNote: (id: string) => Note | undefined;
+  deleteNote: (id: string) => void;
 };
 
 const NotesContext = createContext<NotesContextValue | null>(null);
@@ -41,8 +42,11 @@ export function NotesProvider({ children }: { children: ReactNode }) {
   const getNote: NotesContextValue["getNote"] = (id) =>
     notes.find((n) => n.id === id);
 
+  const deleteNote: NotesContextValue["deleteNote"] = (id) =>
+    setNotes((prev) => prev.filter((n) => n.id !== id));
+
   return (
-    <NotesContext.Provider value={{ notes, addNote, getNote }}>
+    <NotesContext.Provider value={{ notes, addNote, getNote, deleteNote }}>
       {children}
     </NotesContext.Provider>
   );
