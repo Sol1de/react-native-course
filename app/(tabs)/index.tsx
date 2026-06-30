@@ -1,16 +1,13 @@
 import { Link } from "expo-router";
 import { FlatList, Pressable, StyleSheet, Text, View } from "react-native";
-
-const NOTES = [
-  { id: "1", title: "Liste de courses" },
-  { id: "2", title: "Idées d'app" },
-  { id: "3", title: "Notes de réunion" },
-];
+import { useNote } from "../../contexts/notes";
 
 export default function NotesScreen() {
+  const { notes } = useNote();
+
   return (
     <FlatList
-      data={NOTES}
+      data={notes}
       contentInsetAdjustmentBehavior="automatic"
       contentContainerStyle={styles.list}
       keyExtractor={(item) => item.id}

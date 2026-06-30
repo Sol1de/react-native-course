@@ -1,10 +1,12 @@
 import { Stack } from "expo-router";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import { NotesProvider } from "../contexts/notes";
 
 export default function RootLayout() {
   return (
     <SafeAreaProvider>
-      <Stack
+      <NotesProvider>
+        <Stack
         screenOptions={{
           headerStyle: {
             backgroundColor: "#922dba",
@@ -24,7 +26,8 @@ export default function RootLayout() {
             title: "Nouvelle note",
           }}
         />
-      </Stack>
+        </Stack>
+      </NotesProvider>
     </SafeAreaProvider>
   );
 }
