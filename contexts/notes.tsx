@@ -6,6 +6,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { ActivityIndicator, StyleSheet, View } from "react-native";
 
 const STORAGE_KEY = "@notes";
 
@@ -35,13 +36,21 @@ const INITIAL_NOTES: Note[] = [
 
 export function NotesProvider({ children }: { children: ReactNode }) {
   const [notes, setNotes] = useState<Note[]>(INITIAL_NOTES);
+  const [isReady, setIsReady] = useState<boolean>(false);
 
-  useEffect(() => {
-    AsyncStorage.getItem(STORAGE_KEY).then((raw) => {
+  const loadNotes = async () => {
+    try {
+      const raw = await AsyncStorage.getItem(STORAGE_KEY);
       if (raw) {
         setNotes(JSON.parse(raw) as Note[]);
       }
-    });
+    } finally {
+      setIsReady(true);
+    }
+  };
+
+  useEffect(() => {
+    loadNotes();
   }, []);
 
   const saveNotes = (next: Note[]) => {
@@ -75,6 +84,14 @@ export function NotesProvider({ children }: { children: ReactNode }) {
   const deleteNote: NotesContextValue["deleteNote"] = (id) =>
     saveNotes(notes.filter((n) => n.id !== id));
 
+  if (!isReady) {
+    return (
+      <View style={styles.loading}>
+        <ActivityIndicator size="large" />
+      </View>
+    );
+  }
+
   return (
     <NotesContext.Provider
       value={{
@@ -90,6 +107,14 @@ export function NotesProvider({ children }: { children: ReactNode }) {
     </NotesContext.Provider>
   );
 }
+
+const styles = StyleSheet.create({
+  loading: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+});
 
 export function useNote() {
   const ctx = useContext(NotesContext);
