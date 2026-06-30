@@ -10,6 +10,7 @@ import {
 } from "react-native";
 
 export default function CreateNoteScreen() {
+  const [title, setTitle] = useState("Nouvelle note");
   const [text, setText] = useState("");
 
   const close = () => router.back();
@@ -42,7 +43,16 @@ export default function CreateNoteScreen() {
     >
       <Stack.Screen
         options={{
-          title: "Nouvelle note",
+          headerTitle: () => (
+              <TextInput
+                value={title}
+                onChangeText={setTitle}
+                style={styles.headerTitleInput}
+                placeholder="Titre"
+                placeholderTextColor="#ead6f2"
+                selectTextOnFocus
+              />
+          ),
           headerLeft: () => (
             <Pressable onPress={handleCancel} hitSlop={12}>
               <Text style={styles.headerBtn}>Annuler</Text>
@@ -72,6 +82,14 @@ export default function CreateNoteScreen() {
 
 const styles = StyleSheet.create({
   container: { padding: 16 },
+  headerTitleInput: {
+    color: "#ffffff",
+    fontSize: 17,
+    fontWeight: "bold",
+    textAlign: "center",
+    minWidth: 160,
+    paddingVertical: 0,
+  },
   input: {
     minHeight: 160,
     fontSize: 16,
