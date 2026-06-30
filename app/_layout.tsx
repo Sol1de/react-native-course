@@ -26,6 +26,13 @@ export default function RootLayout() {
             title: "Nouvelle note",
           }}
         />
+        <Stack.Screen
+          name="note/edit/[id]"
+          options={{
+            presentation: "modal",
+            title: "Modifier la note",
+          }}
+        />
         </Stack>
       </NotesProvider>
     </SafeAreaProvider>

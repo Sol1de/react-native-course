@@ -9,12 +9,15 @@ export type Note = {
   id: string;
   title: string;
   text: string;
+  updatedAt?: number;
 };
 
 type NotesContextValue = {
   notes: Note[];
   addNote: (note: { title: string; text: string }) => Note;
   getNote: (id: string) => Note | undefined;
+  getNoteById: (id: string) => Note | undefined;
+  updateNote: (id: string, data: Partial<Pick<Note, "title" | "text">>) => void;
   deleteNote: (id: string) => void;
 };
 
@@ -42,11 +45,30 @@ export function NotesProvider({ children }: { children: ReactNode }) {
   const getNote: NotesContextValue["getNote"] = (id) =>
     notes.find((n) => n.id === id);
 
+  const getNoteById: NotesContextValue["getNoteById"] = (id) =>
+    notes.find((n) => n.id === id);
+
+  const updateNote: NotesContextValue["updateNote"] = (id, data) =>
+    setNotes((prev) =>
+      prev.map((n) =>
+        n.id === id ? { ...n, ...data, updatedAt: Date.now() } : n
+      )
+    );
+
   const deleteNote: NotesContextValue["deleteNote"] = (id) =>
     setNotes((prev) => prev.filter((n) => n.id !== id));
 
   return (
-    <NotesContext.Provider value={{ notes, addNote, getNote, deleteNote }}>
+    <NotesContext.Provider
+      value={{
+        notes,
+        addNote,
+        getNote,
+        getNoteById,
+        updateNote,
+        deleteNote,
+      }}
+    >
       {children}
     </NotesContext.Provider>
   );

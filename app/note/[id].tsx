@@ -26,12 +26,26 @@ export default function NoteDetailScreen() {
               <Text style={styles.backText}>Notes</Text>
             </Pressable>
           ),
+          headerRight: () =>
+            note ? (
+              <Pressable
+                onPress={() => router.push(`/note/edit/${id}`)}
+                hitSlop={12}
+              >
+                <Text style={styles.editBtn}>Modifier</Text>
+              </Pressable>
+            ) : null,
         }}
       />
 
       {note ? (
         <>
           <Text style={styles.heading}>{note.title}</Text>
+          {note.updatedAt ? (
+            <Text style={styles.updatedAt}>
+              Modifié le {new Date(note.updatedAt).toLocaleString("fr-FR")}
+            </Text>
+          ) : null}
           {note.text.trim().length > 0 ? (
             <Text selectable style={styles.body}>
               {note.text}
@@ -52,6 +66,8 @@ const styles = StyleSheet.create({
   heading: { fontSize: 22, fontWeight: "bold", color: "#3a0a4d" },
   body: { fontSize: 16, color: "#444" },
   placeholder: { fontSize: 16, color: "#999", fontStyle: "italic" },
+  updatedAt: { fontSize: 13, color: "#922dba" },
   backBtn: { flexDirection: "row", alignItems: "center", gap: 2 },
   backText: { color: "#ffffff", fontSize: 16 },
+  editBtn: { color: "#ffffff", fontSize: 16, fontWeight: "bold" },
 });
