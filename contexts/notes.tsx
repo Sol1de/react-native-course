@@ -6,7 +6,6 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { ActivityIndicator, StyleSheet, View } from "react-native";
 
 const STORAGE_KEY = "@notes";
 
@@ -18,6 +17,7 @@ export type Note = {
 };
 
 type NotesContextValue = {
+  isReady: boolean;
   notes: Note[];
   addNote: (note: { title: string; text: string }) => Note;
   getNote: (id: string) => Note | undefined;
@@ -84,17 +84,10 @@ export function NotesProvider({ children }: { children: ReactNode }) {
   const deleteNote: NotesContextValue["deleteNote"] = (id) =>
     saveNotes(notes.filter((n) => n.id !== id));
 
-  if (!isReady) {
-    return (
-      <View style={styles.loading}>
-        <ActivityIndicator size="large" />
-      </View>
-    );
-  }
-
   return (
     <NotesContext.Provider
       value={{
+        isReady,
         notes,
         addNote,
         getNote,
@@ -107,14 +100,6 @@ export function NotesProvider({ children }: { children: ReactNode }) {
     </NotesContext.Provider>
   );
 }
-
-const styles = StyleSheet.create({
-  loading: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-});
 
 export function useNote() {
   const ctx = useContext(NotesContext);
