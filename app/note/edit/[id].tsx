@@ -1,6 +1,7 @@
 import { Stack, router, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
 import {
+  Alert,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -30,7 +31,11 @@ export default function EditNoteScreen() {
     if (!canSave) return;
     updateNote.mutate(
       { id, title: title.trim(), text },
-      { onSuccess: () => router.back() }
+      {
+        onSuccess: () => router.back(),
+        onError: (error) =>
+          Alert.alert("Enregistrement échoué", error.message),
+      }
     );
   };
 

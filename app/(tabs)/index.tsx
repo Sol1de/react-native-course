@@ -11,6 +11,7 @@ import {
   View,
 } from "react-native";
 import LoadingScreen from "../../components/loadingScreen";
+import { supabase } from "../../lib/supabase";
 import {
   useDeleteNote,
   useNotes,
@@ -62,6 +63,13 @@ export default function NotesScreen() {
               onValueChange={setOnlyPinned}
               trackColor={{ true: "#922dba" }}
             />
+            <Pressable
+              onPress={() => supabase.auth.signOut()}
+              hitSlop={12}
+              style={styles.logout}
+            >
+              <Ionicons name="log-out-outline" size={22} color="#922dba" />
+            </Pressable>
           </View>
         </View>
       }
@@ -122,6 +130,7 @@ const styles = StyleSheet.create({
   },
   filter: { flexDirection: "row", alignItems: "center", gap: 6 },
   filterLabel: { fontSize: 14, color: "#922dba" },
+  logout: { marginLeft: 4 },
   separator: { height: 12 },
   row: {
     flexDirection: "row",

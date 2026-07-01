@@ -34,7 +34,14 @@ export default function CreateNoteScreen() {
   };
 
   const handleSave = () => {
-    addNote.mutate({ title, text }, { onSuccess: close });
+    addNote.mutate(
+      { title, text },
+      {
+        onSuccess: close,
+        onError: (error) =>
+          Alert.alert("Enregistrement échoué", error.message),
+      }
+    );
   };
 
   return (
