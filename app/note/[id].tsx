@@ -1,12 +1,11 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Stack, router, useLocalSearchParams } from "expo-router";
 import { Pressable, ScrollView, StyleSheet, Text } from "react-native";
-import { useNote } from "../../contexts/notes";
+import { useNote } from "../../hooks/notes";
 
 export default function NoteDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { getNote } = useNote();
-  const note = getNote(id);
+  const { data: note } = useNote(id);
 
   return (
     <ScrollView
@@ -41,9 +40,9 @@ export default function NoteDetailScreen() {
       {note ? (
         <>
           <Text style={styles.heading}>{note.title}</Text>
-          {note.updatedAt ? (
+          {note.updated_at ? (
             <Text style={styles.updatedAt}>
-              Modifié le {new Date(note.updatedAt).toLocaleString("fr-FR")}
+              Modifié le {new Date(note.updated_at).toLocaleString("fr-FR")}
             </Text>
           ) : null}
           {note.text.trim().length > 0 ? (

@@ -1,10 +1,32 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Link } from "expo-router";
-import { Alert, FlatList, Pressable, StyleSheet, Text, View } from "react-native";
-import { useNote } from "../../contexts/notes";
+import { useMemo, useState } from "react";
+import {
+  Alert,
+  FlatList,
+  Pressable,
+  StyleSheet,
+  Switch,
+  Text,
+  View,
+} from "react-native";
+import LoadingScreen from "../../components/loadingScreen";
+import {
+  useDeleteNote,
+  useNotes,
+  useTogglePin,
+} from "../../hooks/notes";
 
 export default function NotesScreen() {
-  const { notes, deleteNote } = useNote();
+  const { data: notes = [], isLoading, refetch, isRefetching } = useNotes();
+  const deleteNote = useDeleteNote();
+  const togglePin = useTogglePin();
+  const [onlyPinned, setOnlyPinned] = useState(false);
+
+  const visible = useMemo(
+    () => (onlyPinned ? notes.filter((n) => n.is_pinned) : notes),
+    [notes, onlyPinned]
+  );
 
   const confirmDelete = (id: string, title: string) => {
     Alert.alert("Supprimer la note", `Supprimer « ${title} » ?`, [
@@ -12,29 +34,55 @@ export default function NotesScreen() {
       {
         text: "Supprimer",
         style: "destructive",
-        onPress: () => deleteNote(id),
+        onPress: () => deleteNote.mutate(id),
       },
     ]);
   };
 
+  if (isLoading) {
+    return <LoadingScreen />;
+  }
+
   return (
     <FlatList
-      data={notes}
+      data={visible}
       contentInsetAdjustmentBehavior="automatic"
       contentContainerStyle={styles.list}
       keyExtractor={(item) => item.id}
+      refreshing={isRefetching}
+      onRefresh={refetch}
       ItemSeparatorComponent={() => <View style={styles.separator} />}
       ListHeaderComponent={
-        <Text style={styles.header}>
-          Mes notes ({notes.length})
-        </Text>
+        <View style={styles.headerRow}>
+          <Text style={styles.header}>Mes notes ({visible.length})</Text>
+          <View style={styles.filter}>
+            <Text style={styles.filterLabel}>Épinglées</Text>
+            <Switch
+              value={onlyPinned}
+              onValueChange={setOnlyPinned}
+              trackColor={{ true: "#922dba" }}
+            />
+          </View>
+        </View>
       }
       renderItem={({ item }) => (
         <View style={styles.row}>
+          <Pressable
+            onPress={() =>
+              togglePin.mutate({ id: item.id, is_pinned: !item.is_pinned })
+            }
+            hitSlop={12}
+            style={styles.pinBtn}
+          >
+            <Ionicons
+              name={item.is_pinned ? "pin" : "pin-outline"}
+              size={20}
+              color={item.is_pinned ? "#922dba" : "#b79bc7"}
+            />
+          </Pressable>
           <Link href={`/note/${item.id}`} asChild>
             <Pressable style={styles.rowMain}>
               <Text style={styles.title}>{item.title}</Text>
-              <Text style={styles.meta}>#{item.id}</Text>
             </Pressable>
           </Link>
           <Pressable
@@ -48,7 +96,11 @@ export default function NotesScreen() {
       )}
       ListEmptyComponent={
         <View style={styles.empty}>
-          <Text>Aucune note. Touche + pour en créer une.</Text>
+          <Text>
+            {onlyPinned
+              ? "Aucune note épinglée."
+              : "Aucune note. Touche + pour en créer une."}
+          </Text>
         </View>
       }
     />
@@ -57,12 +109,19 @@ export default function NotesScreen() {
 
 const styles = StyleSheet.create({
   list: { padding: 16 },
+  headerRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 12,
+  },
   header: {
     fontSize: 22,
     fontWeight: "bold",
     color: "#3a0a4d",
-    marginBottom: 12,
   },
+  filter: { flexDirection: "row", alignItems: "center", gap: 6 },
+  filterLabel: { fontSize: 14, color: "#922dba" },
   separator: { height: 12 },
   row: {
     flexDirection: "row",
@@ -71,6 +130,7 @@ const styles = StyleSheet.create({
     borderCurve: "continuous",
     backgroundColor: "#f3e8fa",
   },
+  pinBtn: { paddingLeft: 16, paddingVertical: 16 },
   rowMain: {
     flex: 1,
     flexDirection: "row",
@@ -79,7 +139,6 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   title: { fontSize: 16, fontWeight: "600", color: "#3a0a4d" },
-  meta: { fontSize: 14, color: "#922dba" },
   deleteBtn: { paddingHorizontal: 16, paddingVertical: 16 },
   empty: { padding: 32, alignItems: "center" },
 });

@@ -1,5 +1,5 @@
 import { Stack, router, useLocalSearchParams } from "expo-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Pressable,
   ScrollView,
@@ -7,20 +7,31 @@ import {
   Text,
   TextInput,
 } from "react-native";
-import { useNote } from "../../../contexts/notes";
+import { useNote, useUpdateNote } from "../../../hooks/notes";
 
 export default function EditNoteScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { getNoteById, updateNote } = useNote();
-  const note = getNoteById(id);
-  const [title, setTitle] = useState(note?.title ?? "");
-  const [text, setText] = useState(note?.text ?? "");
+  const { data: note } = useNote(id);
+  const updateNote = useUpdateNote();
+  const [title, setTitle] = useState("");
+  const [text, setText] = useState("");
+  const [hydrated, setHydrated] = useState(false);
   const canSave = title.trim().length > 0;
+
+  useEffect(() => {
+    if (note && !hydrated) {
+      setTitle(note.title);
+      setText(note.text);
+      setHydrated(true);
+    }
+  }, [note, hydrated]);
 
   const handleSave = () => {
     if (!canSave) return;
-    updateNote(id, { title: title.trim(), text });
-    router.back();
+    updateNote.mutate(
+      { id, title: title.trim(), text },
+      { onSuccess: () => router.back() }
+    );
   };
 
   return (

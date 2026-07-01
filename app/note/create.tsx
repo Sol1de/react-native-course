@@ -1,6 +1,6 @@
 import { Stack, router } from "expo-router";
 import { useState } from "react";
-import { useNote } from "../../contexts/notes";
+import { useAddNote } from "../../hooks/notes";
 import {
   Alert,
   Pressable,
@@ -11,7 +11,7 @@ import {
 } from "react-native";
 
 export default function CreateNoteScreen() {
-  const { addNote } = useNote();
+  const addNote = useAddNote();
   const [title, setTitle] = useState("Nouvelle note");
   const [text, setText] = useState("");
 
@@ -33,10 +33,8 @@ export default function CreateNoteScreen() {
     );
   };
 
-  // Enregistrer : ajoute la note au contexte puis ferme
   const handleSave = () => {
-    addNote({ title, text });
-    close();
+    addNote.mutate({ title, text }, { onSuccess: close });
   };
 
   return (
